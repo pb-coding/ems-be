@@ -1,0 +1,7 @@
+micronaut:
+  security:
+    oauth2:
+      clients:
+        enphase:
+          client-id: 8969127dbb1692152b1fb04d2e421694
+          client-secret: c6ac1bd3f47766bb7301c7ddf71dcc48

@@ -1,0 +1,50 @@
+micronaut:
+  application:
+    name: be
+  security:
+    enabled: true
+    ip-patterns: []
+    authentication: bearer
+    endpoints:
+      login:
+        enabled: true
+        path: /login
+        defaultSuccessUrl: /login-success
+        failureUrl: /login-failure
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: d38d58F4ej456Dn364ifnX47rh4z47dn4zdh5Mf
+datasources:
+  default:
+    url: jdbc:postgresql://localhost:5432/emsdevdb
+    username: emsdev
+    password: 1q2w3e4r5t6z7u8i9o0p
+    db-type: postgres
+    dialect: POSTGRES
+    driverClassName: org.postgresql.Driver
+    schema: be
+    data-source-properties:
+      ApplicationName: "ems-be (version 1.0)"
+jpa:
+  default:
+    entity-scan:
+      packages:
+        - com.ems.be
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: none
+        implicit_naming_strategy: jpa
+        show_sql: false
+netty:
+  default:
+    allocator:
+      max-order: 3
+jpa.default.properties.hibernate.hbm2ddl.auto: none
+flyway:
+  datasources:
+    default:
+      enabled: true

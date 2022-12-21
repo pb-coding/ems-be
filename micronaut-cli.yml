@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: com.ems
+testFramework: kotest
+sourceLanguage: kotlin
+buildTool: gradle_kotlin
+features: [ annotation-api, app-name, cache-caffeine, data, data-jpa, flyway, gradle, hibernate-jpa, hibernate-validator, http-client, jackson-databind, jackson-xml, jdbc-hikari, kotest, kotlin, kotlin-application, kotlin-build, logback, management, micronaut-build, netty-server, postgres, readme, security, security-annotations, security-jwt, security-oauth2, shade, test-resources, yaml ]
