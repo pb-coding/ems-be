@@ -45,6 +45,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("org.postgresql:postgresql")
+    compileOnly("org.graalvm.nativeimage:svm")
     implementation("io.micronaut:micronaut-validation")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")

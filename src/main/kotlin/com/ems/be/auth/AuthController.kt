@@ -7,7 +7,7 @@ import io.micronaut.security.rules.SecurityRule
 import java.security.Principal
 
 @Secured(SecurityRule.IS_AUTHENTICATED)
-@Controller("/api/auth")
+@Controller("/auth")
 class AuthController {
     @Produces(TEXT_PLAIN)
     @Get("/login_status")

@@ -8,7 +8,7 @@ import io.micronaut.security.annotation.Secured
 import io.micronaut.security.rules.SecurityRule
 import mu.KotlinLogging
 
-@Controller("/api/backend") //
+@Controller("/backend") //
 class BackendController {
 
     private val logger = KotlinLogging.logger {}

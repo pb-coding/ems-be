@@ -1,10 +1,13 @@
 micronaut:
   application:
     name: be
+---
+#tag::security[]
+micronaut:
   security:
     enabled: true
     ip-patterns: []
-    authentication: bearer
+    authentication: cookie
     endpoints:
       login:
         enabled: true
@@ -17,6 +20,20 @@ micronaut:
           secret:
             generator:
               secret: d38d58F4ej456Dn364ifnX47rh4z47dn4zdh5Mf
+    reject-not-found: false
+#end::security[]
+---
+#tag::refresh[]
+micronaut:
+  security:
+    token:
+      jwt:
+        generator:
+          refresh-token:
+            secret: gh37d57f47dXh47dh4G038f47dj4U7d79f7MQ
+#end::refresh[]
+---
+#tag::datasources[]
 datasources:
   default:
     url: jdbc:postgresql://localhost:5432/emsdevdb
@@ -28,6 +45,9 @@ datasources:
     schema: be
     data-source-properties:
       ApplicationName: "ems-be (version 1.0)"
+#end::datasources[]
+---
+#tag::jpa[]
 jpa:
   default:
     entity-scan:
@@ -39,12 +59,18 @@ jpa:
           auto: none
         implicit_naming_strategy: jpa
         show_sql: false
+#end::jpa[]
+---
+#tag::netty[]
 netty:
   default:
     allocator:
       max-order: 3
-jpa.default.properties.hibernate.hbm2ddl.auto: none
+#end::netty[]
+---
+#tag::flyway[]
 flyway:
   datasources:
     default:
       enabled: true
+#end::flyway[]

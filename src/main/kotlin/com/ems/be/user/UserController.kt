@@ -7,7 +7,7 @@ import io.micronaut.security.annotation.Secured
 import io.micronaut.security.rules.SecurityRule
 import io.micronaut.http.MediaType
 
-@Controller("/api/user")
+@Controller("/user")
 class UserController (private val userService: UserService) {
     @Get("/")
     @Secured(SecurityRule.IS_ANONYMOUS)
@@ -35,7 +35,7 @@ class UserController (private val userService: UserService) {
     }
 
     @Delete("/delete/{userName}")
-    @Secured(SecurityRule.IS_AUTHENTICATED)
+    @Secured(SecurityRule.IS_ANONYMOUS)
     fun deleteUserByUserName(@PathVariable userName: String): MutableHttpResponse<String>? {
         userService.deleteUser(userName)
         return HttpResponse.ok("deleting user")
