@@ -7,7 +7,7 @@ micronaut:
   security:
     enabled: true
     ip-patterns: []
-    authentication: cookie
+    authentication: bearer
     endpoints:
       login:
         enabled: true
