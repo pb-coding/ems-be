@@ -12,10 +12,11 @@ import io.micronaut.http.client.annotation.Client
 interface EnphaseAuthClient {
     // @Consumes(TEXT_PLAIN)
     @Post("/oauth/token")
-    fun retrieveAccessAndRefreshTokens(
+    fun requestAccessAndRefreshTokens(
+            userId: Int,
             @Header(name = "Authorization") authorization: String = "Basic ${Base64.encode("8969127dbb1692152b1fb04d2e421694:c6ac1bd3f47766bb7301c7ddf71dcc48")}",
             @PathVariable("grant_type") grantType: String = "authorization_code",
-            @PathVariable("redirect_uri") redirectUri: String = "http://localhost:8080/enphase/oauth",
+            @PathVariable("redirect_uri") redirectUri: String = "http://localhost:8080/enphase/oauth/${userId}",
             @PathVariable("code") code: String?,
-    ): String
+    ): EnphaseAuthTokens
 }

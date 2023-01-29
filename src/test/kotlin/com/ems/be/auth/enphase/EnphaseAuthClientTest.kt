@@ -24,7 +24,7 @@ class EnphaseAuthClientTest {
 
     @Test
     fun verifyAccessAndRefreshTokensCanBeRetrieved() {
-        val enphaseAuthClientResponse = enphaseAuthClient.retrieveAccessAndRefreshTokens(code ="5zLbpC")
+        val enphaseAuthClientResponse = enphaseAuthClient.requestAccessAndRefreshTokens(userId = 1, code ="5zLbpC")
         logger.info("Access and refresh tokens: $enphaseAuthClientResponse")
         assertNotNull(enphaseAuthClientResponse)
         // assertNotNull(enphaseAuthClientResponse.accessToken)

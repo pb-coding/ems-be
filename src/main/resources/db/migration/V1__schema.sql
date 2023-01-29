@@ -18,3 +18,13 @@ CREATE TABLE refresh_token_entity (
     revoked BOOLEAN NOT NULL,
     date_created DATE NOT NULL
 );
+DROP TABLE IF EXISTS enphase_auth_entity;
+
+CREATE TABLE enphase_auth_entity (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    access_token VARCHAR NOT NULL,
+    refresh_token VARCHAR NOT NULL,
+    creation_date DATE NOT NULL,
+    last_updated DATE NOT NULL
+);
