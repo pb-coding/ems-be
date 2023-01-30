@@ -9,6 +9,9 @@ CREATE TABLE user_entity (
     active BOOLEAN NOT NULL,
     creation_date DATE NOT NULL
 );
+INSERT INTO user_entity(id, user_name, first_name, last_name, email, active, creation_date)
+VALUES (1, 'pb1497', 'Philipp', 'Beckmann', 'pb1497@googlemail.com', true, '2023-01-01');
+
 DROP TABLE IF EXISTS refresh_token_entity;
 
 CREATE TABLE refresh_token_entity (
