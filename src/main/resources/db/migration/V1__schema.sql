@@ -7,9 +7,9 @@ CREATE TABLE user_entity (
     last_name VARCHAR(64) NOT NULL,
     email VARCHAR(50),
     active BOOLEAN NOT NULL,
-    creation_date DATE NOT NULL
+    created_at TIMESTAMP NOT NULL
 );
-INSERT INTO user_entity(id, user_name, first_name, last_name, email, active, creation_date)
+INSERT INTO user_entity(id, user_name, first_name, last_name, email, active, created_at)
 VALUES (1, 'pb1497', 'Philipp', 'Beckmann', 'pb1497@googlemail.com', true, '2023-01-01');
 
 DROP TABLE IF EXISTS refresh_token_entity;
@@ -28,6 +28,6 @@ CREATE TABLE enphase_auth_entity (
     user_id INTEGER NOT NULL,
     access_token VARCHAR NOT NULL,
     refresh_token VARCHAR NOT NULL,
-    creation_date DATE NOT NULL,
-    last_updated DATE NOT NULL
+    created_at TIMESTAMP NOT NULL,
+    last_updated_at TIMESTAMP NOT NULL
 );

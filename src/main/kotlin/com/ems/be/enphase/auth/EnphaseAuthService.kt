@@ -1,29 +1,30 @@
-package com.ems.be.enphase
+package com.ems.be.enphase.auth
 
-import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import mu.KotlinLogging
 import javax.inject.Singleton
 
 @Singleton
 class EnphaseAuthService(
-        private val enphaseAuthRepository: EnphaseAuthRepository,
-        private val enphaseAuthClient: EnphaseAuthClient,
+    private val enphaseAuthRepository: EnphaseAuthRepository,
+    private val enphaseAuthClient: EnphaseAuthClient,
 ) {
 
     private val logger = KotlinLogging.logger {}
 
-    fun getLatestAccessTokensByUserId(userId: Int): List<EnphaseAuthEntity> {
-        return enphaseAuthRepository.getLatestAccessTokenByUserId(userId)
-    }
+    fun getLatestAccessTokensByUserId(userId: Int): EnphaseAuthEntity? =
+        enphaseAuthRepository.getAccessTokensByUserId(userId).maxByOrNull { it.createdAt }
 
     fun addTokens(userId: Int, accessToken: String, refreshToken: String) {
+        val latestToken = getLatestAccessTokensByUserId(userId)
+
         enphaseAuthRepository.update(
-                EnphaseAuthEntity(
-                        userId = userId,
-                        accessToken = accessToken,
-                        refreshToken = refreshToken,
-                )
+            EnphaseAuthEntity(
+                id = latestToken?.id,
+                userId = userId,
+                accessToken = accessToken,
+                refreshToken = refreshToken
+            ),
         )
     }
 
@@ -44,10 +45,10 @@ class EnphaseAuthService(
 
         logger.info("Code $code for userId $userId provided")
 
-        val enphaseAuthTokens = enphaseAuthClient.requestAccessAndRefreshTokens(userId = userId, code = code)
+        val enphaseAuthTokens = enphaseAuthClient.requestEnphaseTokensByAuthCode(userId = userId, code = code)
         logger.info("Access Token: ${enphaseAuthTokens.access_token}")
 
-        enphaseAuthRepository.update(EnphaseAuthEntity(userId = userId, accessToken = enphaseAuthTokens.access_token, refreshToken = enphaseAuthTokens.refresh_token))
+        addTokens(userId, enphaseAuthTokens.access_token, enphaseAuthTokens.refresh_token)
 
         return HttpResponse.ok("Access and refresh tokens retrieved")
     }

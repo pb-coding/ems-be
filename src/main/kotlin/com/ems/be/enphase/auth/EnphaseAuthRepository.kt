@@ -1,4 +1,4 @@
-package com.ems.be.enphase
+package com.ems.be.enphase.auth
 
 import io.micronaut.data.annotation.Query
 import io.micronaut.data.annotation.Repository
@@ -11,5 +11,6 @@ CrudRepository<EnphaseAuthEntity, Int> {
     @Query("""SELECT DISTINCT enphase_auth_entity from EnphaseAuthEntity enphase_auth_entity 
                 WHERE enphase_auth_entity.userId = :userId"""
     )
-    abstract fun getLatestAccessTokenByUserId(userId: Int): List<EnphaseAuthEntity>
+    abstract fun getAccessTokensByUserId(userId: Int): List<EnphaseAuthEntity>
+
 }

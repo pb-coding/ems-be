@@ -1,5 +1,7 @@
-package com.ems.be.enphase
+package com.ems.be.enphase.auth
 
+import io.micronaut.data.annotation.DateCreated
+import io.micronaut.data.annotation.DateUpdated
 import io.micronaut.security.token.jwt.render.BearerAccessRefreshToken
 import java.time.LocalDateTime
 import javax.persistence.*
@@ -17,8 +19,8 @@ class EnphaseAuthEntity(
     var accessToken: String,
     @Column(name = "refresh_token")
     var refreshToken: String,
-    @Column(name = "creation_date")
-    var creationDate: LocalDateTime = LocalDateTime.now(),
-    @Column(name = "last_updated")
-    var lastUpdated: LocalDateTime = LocalDateTime.now()
+    @Column(name = "created_at")
+    var createdAt: LocalDateTime = LocalDateTime.now(),
+    @Column(name = "last_updated_at")
+    var lastUpdatedAt: LocalDateTime = LocalDateTime.now(),
 )

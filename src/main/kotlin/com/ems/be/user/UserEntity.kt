@@ -20,7 +20,7 @@ class UserEntity(
     var email: String,
     @Column(name = "active")
     var isActive: Boolean,
-    @Column(name = "creation_date")
+    @Column(name = "created_at")
     var creationDate: LocalDateTime = LocalDateTime.now()
 ) {
     fun getFullName() = "$firstName, $lastName"

@@ -1,4 +1,4 @@
-package com.ems.be.enphase
+package com.ems.be.enphase.auth
 
 import com.fasterxml.jackson.databind.ObjectMapper
 
