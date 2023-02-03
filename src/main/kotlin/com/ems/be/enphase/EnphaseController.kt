@@ -15,6 +15,23 @@ class EnphaseController(
     val enphaseService: EnphaseService,
 ) {
     private val logger = KotlinLogging.logger {}
+
+    @Get("/systems")
+    fun getAllSolarSystems(principal: Principal): HttpResponse<*> {
+        return enphaseService.requestAllSolarSystems(principal.name)
+    }
+
+    @Get("/system/{solar_system_id}")
+    fun getSolarSystemById(
+            principal: Principal,
+            @QueryValue("solar_system_id") solarSystemId: Int,
+    ): HttpResponse<*> {
+        return enphaseService.requestSolarSystemById(
+                userName = principal.name,
+                solarSystemId = solarSystemId
+        )
+    }
+
     @Get("/production")
     fun getSolarProductionData(
             principal: Principal,

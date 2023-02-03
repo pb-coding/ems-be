@@ -10,7 +10,7 @@ import io.micronaut.security.rules.SecurityRule
 import mu.KotlinLogging
 import java.security.Principal
 
-@Secured(SecurityRule.IS_ANONYMOUS)
+
 @Controller("/enphase")
 class EnphaseAuthController(
         val enphaseAuthService: EnphaseAuthService
@@ -18,6 +18,15 @@ class EnphaseAuthController(
 
     private val logger = KotlinLogging.logger {}
 
+    @Secured(SecurityRule.IS_AUTHENTICATED)
+    @Get("/login_status")
+    fun checkLoginStatus(principal: Principal): HttpResponse<*> {
+        return enphaseAuthService.checkEnphaseLoginStatus(principal.name)
+    }
+
+    // TODO: make this more secure - users may not manipulate setting their access tokens in the db for different users - maybe give access token as query param?
+
+    @Secured(SecurityRule.IS_ANONYMOUS)
     @Get("/oauth/{userid}")
     fun getEnphaseAuthCode(
             @PathVariable("userid") userId: String,

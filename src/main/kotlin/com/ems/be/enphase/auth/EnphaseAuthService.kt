@@ -1,5 +1,6 @@
 package com.ems.be.enphase.auth
 
+import com.ems.be.enphase.EnphaseService
 import com.ems.be.user.UserService
 import io.micronaut.http.HttpResponse
 import mu.KotlinLogging
@@ -10,9 +11,33 @@ class EnphaseAuthService(
         private val enphaseAuthRepository: EnphaseAuthRepository,
         private val enphaseAuthClient: EnphaseAuthClient,
         private val userService: UserService,
+        private val enphaseService: EnphaseService,
 ) {
 
     private val logger = KotlinLogging.logger {}
+
+    fun checkEnphaseLoginStatus(userName: String): HttpResponse<*> {
+        val enphaseAuthEntity = getLatestAccessTokenByUserName(userName = userName)
+        if (enphaseAuthEntity == null) {
+            logger.error("No access token found for this user. User needs to login into Enphase.")
+            return HttpResponse.ok(EnphaseLoginStatus(false))
+        }
+
+        val accessToken = enphaseAuthEntity.accessToken
+        logger.info("Access token found for this user: $accessToken")
+
+        val accessTokenIsValid = enphaseService.checkIfAccessTokenIsValid(accessToken = accessToken)
+
+        if (!accessTokenIsValid) {
+            logger.error("Access token is not valid anymore. Trying to refresh tokens.")
+            // TODO: Refresh tokens
+            return HttpResponse.ok(EnphaseLoginStatus(false))
+        }
+
+        logger.error("Access token is valid.")
+
+        return HttpResponse.ok(EnphaseLoginStatus(true))
+    }
 
     fun getLatestAccessTokenByUserName(userName: String): EnphaseAuthEntity? {
         val userId = userService.getUserByUserName(userName)?.id
@@ -66,3 +91,6 @@ class EnphaseAuthService(
     }
 
 }
+data class EnphaseLoginStatus(
+    val isUserLoggedIntoEnphase: Boolean
+)

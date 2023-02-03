@@ -8,6 +8,7 @@ import io.micronaut.http.client.annotation.Client
 @Client("https://api.enphaseenergy.com")
 interface EnphaseAuthClient {
 
+    // TODO: set domain as environment variable
     @Post("/oauth/token")
     fun requestEnphaseTokensByAuthCode(
         userId: Int,
