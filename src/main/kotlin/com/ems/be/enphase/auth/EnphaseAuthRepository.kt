@@ -13,4 +13,9 @@ CrudRepository<EnphaseAuthEntity, Int> {
     )
     abstract fun getAccessTokensByUserId(userId: Int): List<EnphaseAuthEntity>
 
+    @Query("""SELECT DISTINCT enphase_auth_entity from EnphaseAuthEntity enphase_auth_entity 
+                WHERE enphase_auth_entity.userName = :userName"""
+    )
+    abstract fun getAccessTokensByUserName(userName: String): List<EnphaseAuthEntity>
+
 }

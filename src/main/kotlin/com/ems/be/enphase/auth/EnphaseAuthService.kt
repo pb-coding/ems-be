@@ -1,16 +1,28 @@
 package com.ems.be.enphase.auth
 
+import com.ems.be.user.UserService
 import io.micronaut.http.HttpResponse
 import mu.KotlinLogging
 import javax.inject.Singleton
 
 @Singleton
 class EnphaseAuthService(
-    private val enphaseAuthRepository: EnphaseAuthRepository,
-    private val enphaseAuthClient: EnphaseAuthClient,
+        private val enphaseAuthRepository: EnphaseAuthRepository,
+        private val enphaseAuthClient: EnphaseAuthClient,
+        private val userService: UserService,
 ) {
 
     private val logger = KotlinLogging.logger {}
+
+    fun getLatestAccessTokenByUserName(userName: String): EnphaseAuthEntity? {
+        val userId = userService.getUserByUserName(userName)?.id
+
+        if (userId == null) {
+            logger.error("No user found for this username.")
+            return null
+        }
+        return getLatestAccessTokensByUserId(userId = userId)
+    }
 
     fun getLatestAccessTokensByUserId(userId: Int): EnphaseAuthEntity? =
         enphaseAuthRepository.getAccessTokensByUserId(userId).maxByOrNull { it.createdAt }
