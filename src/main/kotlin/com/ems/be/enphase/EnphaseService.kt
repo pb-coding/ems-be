@@ -14,12 +14,26 @@ class EnphaseService(
 
     private val logger = KotlinLogging.logger {}
 
-    fun checkIfAccessTokenIsValid(accessToken: String): Boolean {
-        val enphaseSolarSystems = enphaseClient.requestAllSolarSystemsOverview(accessToken = accessToken)
-        if (enphaseSolarSystems == null) {
-            return false
+    fun checkEnphaseLoginStatus(userName: String): HttpResponse<*> {
+        val enphaseAuthEntity = enphaseAuthService.getLatestAccessTokenByUserName(userName = userName)
+        if (enphaseAuthEntity == null) {
+            logger.error("No access token found for this user. User needs to login into Enphase.")
+            return HttpResponse.ok(EnphaseLoginStatus(false))
         }
-        return true
+
+        val accessToken = enphaseAuthEntity.accessToken
+        logger.info("Access token found for this user: $accessToken")
+
+        val enphaseClientResponse = enphaseClient.requestAllSolarSystemsOverview(accessToken = accessToken)
+        if (enphaseClientResponse == null) {
+            logger.error("Access token is not valid anymore. Trying to refresh tokens.")
+            // TODO: Refresh tokens
+            return HttpResponse.ok(EnphaseLoginStatus(false))
+        }
+
+        logger.info("Access token is valid.")
+
+        return HttpResponse.ok(EnphaseLoginStatus(true))
     }
 
     fun requestAllSolarSystems(userName: String): HttpResponse<*> {

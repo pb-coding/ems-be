@@ -10,18 +10,23 @@ import mu.KotlinLogging
 import java.security.Principal
 
 @Secured(SecurityRule.IS_AUTHENTICATED)
-@Controller("/enphase/solar")
+@Controller("/enphase")
 class EnphaseController(
     val enphaseService: EnphaseService,
 ) {
     private val logger = KotlinLogging.logger {}
 
-    @Get("/systems")
+    @Get("/login_status")
+    fun checkLoginStatus(principal: Principal): HttpResponse<*> {
+        return enphaseService.checkEnphaseLoginStatus(principal.name)
+    }
+
+    @Get("/solar/systems")
     fun getAllSolarSystems(principal: Principal): HttpResponse<*> {
         return enphaseService.requestAllSolarSystems(principal.name)
     }
 
-    @Get("/system/{solar_system_id}")
+    @Get("/solar/system/{solar_system_id}")
     fun getSolarSystemById(
             principal: Principal,
             @QueryValue("solar_system_id") solarSystemId: Int,
@@ -32,7 +37,7 @@ class EnphaseController(
         )
     }
 
-    @Get("/production")
+    @Get("/solar/production")
     fun getSolarProductionData(
             principal: Principal,
             @QueryValue("solar_system_id") solarSystemId: Int,
