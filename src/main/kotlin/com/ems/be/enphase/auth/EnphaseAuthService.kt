@@ -4,6 +4,7 @@ import com.ems.be.enphase.EnphaseService
 import com.ems.be.user.UserService
 import io.micronaut.http.HttpResponse
 import mu.KotlinLogging
+import java.net.URI
 import javax.inject.Singleton
 
 @Singleton
@@ -63,7 +64,10 @@ class EnphaseAuthService(
 
         addTokens(userId, enphaseAuthTokens.access_token, enphaseAuthTokens.refresh_token)
 
-        return HttpResponse.ok("Access and refresh tokens retrieved")
+        // TODO: let frontend handle auth code request to backend
+        // TODO: or pass url as environment variabel
+        val frontendEnphaseAuthUri = URI("http://localhost:5173/enphase-auth")
+        return HttpResponse.redirect(frontendEnphaseAuthUri)
     }
 
     fun refreshEnphaseAuthTokens(userName: String, refreshToken: String): EnphaseAuthEntity? {

@@ -3,6 +3,8 @@ package com.ems.be.enphase
 import com.ems.be.enphase.auth.EnphaseAuthService
 import com.ems.be.enphase.auth.EnphaseLoginStatus
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
+import io.micronaut.http.client.exceptions.HttpClientResponseException
 import mu.KotlinLogging
 import javax.inject.Singleton
 
@@ -56,16 +58,33 @@ class EnphaseService(
         return HttpResponse.ok(enphaseSolarSystems)
     }
 
+    data class EnphaseAccessTokenMissingResponse(
+        val code: Int = 202,
+        val message: String = "Backend request accepted, but Enphase access token is missing. Please login.",
+    )
+
+    data class EnphaseAccessTokenInvalidResponse(
+        val code: Int = 202,
+        val message: String = "Backend request accepted, but Enphase access token is invalid. Please login.",
+    )
+
     fun requestSolarSystemById(userName: String, solarSystemId: Int): HttpResponse<*> {
         val accessToken = enphaseAuthService.getLatestAccessTokenByUserName(userName = userName)?.accessToken
         if (accessToken == null) {
             logger.error("No access token found for this user.")
-            return HttpResponse.badRequest("No access token found for this user.")
+            return HttpResponse.badRequest(EnphaseAccessTokenMissingResponse())
         }
         logger.info("Access token found for this user: $accessToken")
 
-        val enphaseSolarSystem = enphaseClient.requestSolarSystemById(accessToken = accessToken, solarSystemId = solarSystemId)
-        return HttpResponse.ok(enphaseSolarSystem)
+        try {
+            val enphaseSolarSystem = enphaseClient.requestSolarSystemById(accessToken = accessToken, solarSystemId = solarSystemId)
+            return HttpResponse.ok(enphaseSolarSystem)
+        }
+        catch (e: HttpClientResponseException) {
+            return HttpResponse.badRequest(EnphaseAccessTokenInvalidResponse())
+        }
+
+
     }
 
     fun requestSolarProductionData(
@@ -88,6 +107,19 @@ class EnphaseService(
                 startAt = startAt
         )
         return HttpResponse.ok(enphaseProductionStats)
+    }
+
+    fun makeRequestHandleErrors(requestFunction: () -> HttpResponse<*>): HttpResponse<*> {
+        return try {
+
+            requestFunction()
+
+        } catch (e: HttpClientResponseException) {
+
+            logger.info("ERROR: $e")
+            return HttpResponse.badRequest(e)
+
+        }
     }
 
 }
