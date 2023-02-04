@@ -25,10 +25,18 @@ class EnphaseService(
         logger.info("Access token found for this user: $accessToken")
 
         val enphaseClientResponse = enphaseClient.requestAllSolarSystemsOverview(accessToken = accessToken)
-        if (enphaseClientResponse == null) {
+        logger.info(enphaseClientResponse.toString())
+        if (enphaseClientResponse.total == null) {
             logger.error("Access token is not valid anymore. Trying to refresh tokens.")
-            // TODO: Refresh tokens
-            return HttpResponse.ok(EnphaseLoginStatus(false))
+            val refreshedEnphaseAuthTokens = enphaseAuthService.refreshEnphaseAuthTokens(
+                    userName = userName,
+                    refreshToken = enphaseAuthEntity.refreshToken
+            )
+            if (refreshedEnphaseAuthTokens == null) {
+                logger.error("Access token could not be refreshed. User needs to login into Enphase.")
+                return HttpResponse.ok(EnphaseLoginStatus(false))
+            }
+            return HttpResponse.ok(EnphaseLoginStatus(true))
         }
 
         logger.info("Access token is valid.")

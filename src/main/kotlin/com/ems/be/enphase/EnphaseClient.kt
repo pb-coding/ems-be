@@ -18,6 +18,9 @@ interface EnphaseClient {
         @QueryValue("key") key: String = "75c7404db819a24ee0bafcfd6714c163",
     ): EnphaseSolarSystemsOverviewResponse
 
+    //handle http error codes
+    //https://docs.micronaut.io/latest/guide/index.html#httpClientErrorHandling
+
     @Get("/systems/{solarSystemId}")
     fun requestSolarSystemById(
         accessToken: String,

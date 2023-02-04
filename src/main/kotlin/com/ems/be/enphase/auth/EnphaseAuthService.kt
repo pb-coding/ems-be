@@ -28,10 +28,10 @@ class EnphaseAuthService(
     fun getLatestAccessTokensByUserId(userId: Int): EnphaseAuthEntity? =
         enphaseAuthRepository.getAccessTokensByUserId(userId).maxByOrNull { it.createdAt }
 
-    fun addTokens(userId: Int, accessToken: String, refreshToken: String) {
+    fun addTokens(userId: Int, accessToken: String, refreshToken: String): EnphaseAuthEntity {
         val latestToken = getLatestAccessTokensByUserId(userId)
 
-        enphaseAuthRepository.update(
+        return enphaseAuthRepository.update(
             EnphaseAuthEntity(
                 id = latestToken?.id,
                 userId = userId,
@@ -64,6 +64,22 @@ class EnphaseAuthService(
         addTokens(userId, enphaseAuthTokens.access_token, enphaseAuthTokens.refresh_token)
 
         return HttpResponse.ok("Access and refresh tokens retrieved")
+    }
+
+    fun refreshEnphaseAuthTokens(userName: String, refreshToken: String): EnphaseAuthEntity? {
+        val userId = userService.getUserByUserName(userName)?.id
+
+        if (userId == null) {
+            logger.error("No user found for this username.")
+            return null
+        }
+        val refreshedEnphaseAuthTokens = enphaseAuthClient.requestRefreshedTokensByRefreshToken(refreshToken = refreshToken)
+        // TODO: error handling not working
+        if (refreshedEnphaseAuthTokens == null) {
+            logger.error("Tokens could not be refreshed.")
+            return null
+        }
+        return addTokens(userId, refreshedEnphaseAuthTokens.access_token, refreshedEnphaseAuthTokens.refresh_token)
     }
 
 }
