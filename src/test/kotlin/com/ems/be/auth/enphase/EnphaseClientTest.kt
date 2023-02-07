@@ -1,6 +1,5 @@
 package com.ems.be.enphase
 
-import com.ems.be.enphase.auth.EnphaseAuthClient
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
 import mu.KotlinLogging
@@ -40,7 +39,7 @@ class EnphaseClientTest {
         val solarSystemId = 3447361
         val startAt = "1671881021"
         val endAt = "1671884621"
-        val enphaseClientResponse = enphaseClient.requestProductionStats(solarSystemId = solarSystemId, accessToken = accessToken, startAt = startAt, endAt = endAt)
+        val enphaseClientResponse = enphaseClient.requestProductionData(solarSystemId = solarSystemId, accessToken = accessToken, startAt = startAt, endAt = endAt)
         logger.info("Production Stats response: $enphaseClientResponse")
         assertEquals(enphaseClientResponse.system_id, solarSystemId)
     }

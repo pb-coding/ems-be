@@ -2,42 +2,7 @@ package com.ems.be.enphase
 
 import java.sql.Timestamp
 
-// /rgm_stats
-data class EnphaseProductionStatsResponse(
-    val system_id: Int,
-    val total_devices: Int,
-    val intervals: List<EnphaseProductionStatsInterval>,
-    val meta: EnphaseProductionStatsMeta,
-    val meter_intervals: List<EnphaseProductionStatsMeterInterval>,
-)
-
-data class EnphaseProductionStatsInterval(
-    val end_at: String,
-    val devices_reporting: Int,
-    val wh_del: Int,
-)
-
-data class EnphaseProductionStatsMeta(
-    val status: String,
-    val last_report_at: Timestamp,
-    val last_energy_at: Timestamp,
-    val operational_at: Timestamp,
-)
-
-data class EnphaseProductionStatsMeterInterval(
-    val meter_serial_number: String,
-    val envoy_serial_number: String,
-    val intervals: List<EnphaseProductionStatsSpecificMeterInterval>,
-)
-
-data class EnphaseProductionStatsSpecificMeterInterval(
-    val channel: Int,
-    val wh_del: Int,
-    val curr_w: Int,
-    val end_at: Timestamp,
-)
-
-// /systems (overview)
+/** Endpoint: /systems (overview) **/
 data class EnphaseSolarSystemsOverviewResponse(
     val total: Int?,
     val current_page: Int?,
@@ -72,7 +37,7 @@ data class SolarSystemAddress(
     val postal_code: String?,
 )
 
-// /systems/{solarSystemId}
+/** Endpoint: /systems/{solarSystemId} **/
 data class EnphaseSolarSystemResponse(
     val system_id: Int?,
     val name: String?,
@@ -85,4 +50,77 @@ data class EnphaseSolarSystemResponse(
     val last_energy_at: Timestamp?,
     val operational_at: Timestamp?,
     val other_references: List<String>?
+)
+
+
+/** Endpoint /rgm_stats **/
+data class EnphaseProductionDataResponse(
+    val system_id: Int,
+    val total_devices: Int,
+    val intervals: List<EnphaseProductionInterval>,
+    val meta: EnphaseProductionDataMeta,
+    val meter_intervals: List<EnphaseProductionDataMeterInterval>,
+)
+
+data class EnphaseProductionInterval(
+    val end_at: Timestamp,
+    val devices_reporting: Int,
+    val wh_del: Int,
+)
+
+data class EnphaseProductionDataMeta(
+    val status: String,
+    val last_report_at: Timestamp,
+    val last_energy_at: Timestamp,
+    val operational_at: Timestamp,
+)
+
+data class EnphaseProductionDataMeterInterval(
+    val meter_serial_number: String,
+    val envoy_serial_number: String,
+    val intervals: List<EnphaseProductionStatsSpecificMeterInterval>,
+)
+
+data class EnphaseProductionStatsSpecificMeterInterval(
+    val channel: Int,
+    val wh_del: Int,
+    val curr_w: Int,
+    val end_at: Timestamp,
+)
+
+
+/** Endpoint: /systems/{solarSystemId}/telemetry/consumption_meter **/
+data class EnphaseConsumptionDataResponse(
+    val system_id: Int,
+    val granularity: String,
+    val total_devices: Int,
+    val start_date: String,
+    val end_date: String,
+    val items: String,
+    val intervals: List<EnphaseConsumptionInterval>,
+    val meta: EnphaseConsumptionMeta
+)
+
+data class EnphaseConsumptionInterval(
+    val end_at: Timestamp,
+    val devices_reporting: Int,
+    val enwh: Int
+)
+
+data class EnphaseConsumptionMeta(
+    val status: String,
+    val last_report_at: Timestamp,
+    val last_energy_at: Timestamp,
+    val operational_at: Timestamp
+)
+
+/** Custom Summary Endpoint **/
+data class CustomEnergyDataSummary(
+    val intervals: List<CustomProductionConsumptionInterval>
+)
+
+data class CustomProductionConsumptionInterval(
+    val end_at: Timestamp,
+    val production: Int,
+    val consumption: Int
 )

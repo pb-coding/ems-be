@@ -8,6 +8,7 @@ import io.micronaut.security.annotation.Secured
 import io.micronaut.security.rules.SecurityRule
 import mu.KotlinLogging
 import java.security.Principal
+import java.time.LocalDateTime
 
 @Secured(SecurityRule.IS_AUTHENTICATED)
 @Controller("/enphase")
@@ -49,6 +50,32 @@ class EnphaseController(
                 solarSystemId = solarSystemId,
                 startAt = startAt,
                 endAt = endAt
+        )
+    }
+
+    @Get("/solar/consumption")
+    fun getSolarConsumptionData(
+        principal: Principal,
+        @QueryValue("solar_system_id") solarSystemId: Int,
+        @QueryValue("start_date") startDate: String,
+    ): HttpResponse<*> {
+        return enphaseService.requestSolarConsumptionData(
+            userName = principal.name,
+            solarSystemId = solarSystemId,
+            startDate = startDate
+        )
+    }
+
+    @Get("/solar/summary")
+    fun getSolarSummaryForFixedTimeframes(
+        principal: Principal,
+        @QueryValue("solar_system_id") solarSystemId: Int,
+        @QueryValue("start_date") startDate: String,
+    ): HttpResponse<*> {
+        return enphaseService.summarizeProductionAndConsumption(
+            userName = principal.name,
+            solarSystemId = solarSystemId,
+            startDate = startDate
         )
     }
 }

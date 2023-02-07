@@ -3,9 +3,13 @@ package com.ems.be.enphase
 import com.ems.be.enphase.auth.EnphaseAuthService
 import com.ems.be.enphase.auth.EnphaseLoginStatus
 import io.micronaut.http.HttpResponse
-import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import mu.KotlinLogging
+import java.sql.Timestamp
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import javax.inject.Singleton
 
 @Singleton
@@ -100,26 +104,82 @@ class EnphaseService(
         }
         logger.info("Access token found for this user: $accessToken")
 
-        val enphaseProductionStats = enphaseClient.requestProductionStats(
+        val enphaseProductionData = enphaseClient.requestProductionData(
                 accessToken = accessToken,
                 solarSystemId = solarSystemId,
                 endAt = endAt,
                 startAt = startAt
         )
-        return HttpResponse.ok(enphaseProductionStats)
+        return HttpResponse.ok(enphaseProductionData)
     }
 
-    fun makeRequestHandleErrors(requestFunction: () -> HttpResponse<*>): HttpResponse<*> {
-        return try {
-
-            requestFunction()
-
-        } catch (e: HttpClientResponseException) {
-
-            logger.info("ERROR: $e")
-            return HttpResponse.badRequest(e)
-
+    fun requestSolarConsumptionData(
+        userName: String,
+        solarSystemId: Int,
+        startDate: String
+    ): HttpResponse<*> {
+        val accessToken = enphaseAuthService.getLatestAccessTokenByUserName(userName = userName)?.accessToken
+        if (accessToken == null) {
+            logger.error("No access token found for this user.")
+            return HttpResponse.badRequest("No access token found for this user.")
         }
+        logger.info("Access token found for this user: $accessToken")
+
+        val enphaseConsumptionData = enphaseClient.getConsumptionDataForDate(
+            accessToken = accessToken,
+            solarSystemId = solarSystemId,
+            startDate = startDate
+        )
+        return HttpResponse.ok(enphaseConsumptionData)
+    }
+
+    fun combineProductionAndConsumptionIntervals(
+        productionIntervals: List<EnphaseProductionInterval>,
+        consumptionIntervals: List<EnphaseConsumptionInterval>
+    ): List<CustomProductionConsumptionInterval> = productionIntervals.map { productionInterval ->
+        CustomProductionConsumptionInterval(
+            productionInterval.end_at,
+            productionInterval.wh_del,
+            consumptionIntervals
+                .find { it.end_at == productionInterval.end_at }
+                ?.enwh
+                ?: 0
+        )
+    }
+
+    fun summarizeProductionAndConsumption(
+        userName: String,
+        solarSystemId: Int,
+        startDate: String
+    ): HttpResponse<*> {
+        val accessToken = enphaseAuthService.getLatestAccessTokenByUserName(userName = userName)?.accessToken
+        if (accessToken == null) {
+            logger.error("No access token found for this user.")
+            return HttpResponse.badRequest("No access token found for this user.")
+        }
+        logger.info("Access token found for this user: $accessToken")
+
+
+        val german_zone = ZoneId.of("Europe/Berlin").getRules().getOffset(LocalDateTime.now());
+        val startAtDateTime = Timestamp.valueOf("$startDate 00:00:00").toLocalDateTime().atOffset(german_zone)
+        val startAt = startAtDateTime.toEpochSecond()
+        val endAt = startAtDateTime.plusDays(1).toEpochSecond()
+
+        val enphaseProductionData = enphaseClient.requestProductionData(
+            accessToken = accessToken,
+            solarSystemId = solarSystemId,
+            endAt = endAt.toString(),
+            startAt = startAt.toString()
+        )
+
+        val enphaseConsumptionData = enphaseClient.getConsumptionDataForDate(
+            accessToken = accessToken,
+            solarSystemId = solarSystemId,
+            startDate = startDate
+        )
+
+        val summaryProductionConsumptionData = combineProductionAndConsumptionIntervals(enphaseProductionData.intervals, enphaseConsumptionData.intervals)
+        return HttpResponse.ok(summaryProductionConsumptionData)
     }
 
 }
