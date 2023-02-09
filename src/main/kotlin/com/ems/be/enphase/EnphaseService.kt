@@ -8,8 +8,6 @@ import mu.KotlinLogging
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import javax.inject.Singleton
 
 @Singleton
@@ -179,6 +177,7 @@ class EnphaseService(
         )
 
         val summaryProductionConsumptionData = combineProductionAndConsumptionIntervals(enphaseProductionData.intervals, enphaseConsumptionData.intervals)
+                .map { it.copy(consumption = it.consumption * -1) }
         return HttpResponse.ok(summaryProductionConsumptionData)
     }
 
