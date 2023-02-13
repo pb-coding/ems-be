@@ -18,63 +18,68 @@ class EnphaseService(
 
     private val logger = KotlinLogging.logger {}
 
-    fun checkEnphaseLoginStatus(userName: String): HttpResponse<*> {
+    fun makeEnphaseRequestWithHandler(
+            userName: String,
+            enphaseApiCall: (accessToken: String) -> Unit,
+            checkLoginStatusOnly: Boolean = false,
+    ): HttpResponse<*> {
+
         val enphaseAuthEntity = enphaseAuthService.getLatestAccessTokenByUserName(userName = userName)
         if (enphaseAuthEntity == null) {
             logger.error("No access token found for this user. User needs to login into Enphase.")
-            return HttpResponse.ok(EnphaseLoginStatus(false))
+            if (checkLoginStatusOnly) return HttpResponse.ok(EnphaseLoginStatus(false))
+            return HttpResponse.badRequest(EnphaseAuthTokensMissingResponse())
         }
 
         val accessToken = enphaseAuthEntity.accessToken
         logger.info("Access token found for this user: $accessToken")
 
-        val enphaseClientResponse = enphaseClient.requestAllSolarSystemsOverview(accessToken = accessToken)
-        logger.info(enphaseClientResponse.toString())
-        if (enphaseClientResponse.total == null) {
+        try {
+            val enphaseApiResponse = enphaseApiCall(accessToken)
+            if (checkLoginStatusOnly) return HttpResponse.ok(EnphaseLoginStatus(true))
+            return HttpResponse.ok(enphaseApiResponse)
+
+        } catch (e: HttpClientResponseException) {
+            if (e.status.code != 401) {
+                logger.error("Unexpected error while checking Enphase login status: ${e.message}")
+                if (checkLoginStatusOnly) return HttpResponse.ok(EnphaseLoginStatus(false))
+                return HttpResponse.badRequest(UnknownEnphaseErrorResponse())
+            }
             logger.error("Access token is not valid anymore. Trying to refresh tokens.")
             val refreshedEnphaseAuthTokens = enphaseAuthService.refreshEnphaseAuthTokens(
-                    userName = userName,
-                    refreshToken = enphaseAuthEntity.refreshToken
+                userName = userName,
+                refreshToken = enphaseAuthEntity.refreshToken
             )
+
             if (refreshedEnphaseAuthTokens == null) {
                 logger.error("Access token could not be refreshed. User needs to login into Enphase.")
-                return HttpResponse.ok(EnphaseLoginStatus(false))
+                if (checkLoginStatusOnly) return HttpResponse.ok(EnphaseLoginStatus(false))
+                return HttpResponse.badRequest(EnphaseAuthTokensMissingResponse())
             }
+            logger.info("Access token refreshed successfully.")
             return HttpResponse.ok(EnphaseLoginStatus(true))
         }
-
-        logger.info("Access token is valid.")
-
-        return HttpResponse.ok(EnphaseLoginStatus(true))
     }
 
-    fun requestAllSolarSystems(userName: String): HttpResponse<*> {
-        val accessToken = enphaseAuthService.getLatestAccessTokenByUserName(userName = userName)?.accessToken
-        if (accessToken == null) {
-            logger.error("No access token found for this user.")
-            return HttpResponse.badRequest("No access token found for this user.")
-        }
-        logger.info("Access token found for this user: $accessToken")
+    fun checkEnphaseLoginStatus(userName: String): HttpResponse<*> =
+        makeEnphaseRequestWithHandler(
+                userName = userName,
+                enphaseClient::requestAllSolarSystemsOverview,
+                checkLoginStatusOnly = true
+        )
 
-        val enphaseSolarSystems = enphaseClient.requestAllSolarSystemsOverview(accessToken = accessToken)
-        return HttpResponse.ok(enphaseSolarSystems)
-    }
+    fun requestAllSolarSystems(userName: String): HttpResponse<*> =
+        makeEnphaseRequestWithHandler(
+                userName = userName,
+                enphaseClient::requestAllSolarSystemsOverview,
+        )
 
-    data class EnphaseAccessTokenMissingResponse(
-        val code: Int = 202,
-        val message: String = "Backend request accepted, but Enphase access token is missing. Please login.",
-    )
-
-    data class EnphaseAccessTokenInvalidResponse(
-        val code: Int = 202,
-        val message: String = "Backend request accepted, but Enphase access token is invalid. Please login.",
-    )
 
     fun requestSolarSystemById(userName: String, solarSystemId: Int): HttpResponse<*> {
         val accessToken = enphaseAuthService.getLatestAccessTokenByUserName(userName = userName)?.accessToken
         if (accessToken == null) {
             logger.error("No access token found for this user.")
-            return HttpResponse.badRequest(EnphaseAccessTokenMissingResponse())
+            return HttpResponse.badRequest(EnphaseAuthTokensMissingResponse())
         }
         logger.info("Access token found for this user: $accessToken")
 
@@ -83,7 +88,7 @@ class EnphaseService(
             return HttpResponse.ok(enphaseSolarSystem)
         }
         catch (e: HttpClientResponseException) {
-            return HttpResponse.badRequest(EnphaseAccessTokenInvalidResponse())
+            return HttpResponse.badRequest(EnphaseAuthTokensInvalidResponse())
         }
 
 
