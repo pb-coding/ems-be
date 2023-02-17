@@ -1,2 +1,2 @@
-Energy Management Platform
+# Energy Management Platform Backend
 WIP
